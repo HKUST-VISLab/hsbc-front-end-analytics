@@ -19,6 +19,19 @@ function getStationsConfig (callback) {
   })
 }
 
+function getCorrRecordsOfStation(id, attr, hour_range, start_time, end_time,callback){
+  const url = `${dataServerUrl}/getallrecordsofstation`;
+  const post_json = {
+    'stationId': id, 'attr': attr, 'start_time': start_time, 'end_time': end_time, 'hour_range': hour_range
+  };
+
+  $http.post(url, post_json).then(response => {
+    callback(response.data)
+  }, errResponse => {
+    console.log(errResponse)
+  })
+}
 export default{
-  getStationsConfig
+  getStationsConfig,
+  getCorrRecordsOfStation
 }

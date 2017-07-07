@@ -6,13 +6,13 @@
 <script>
 
   //  import dataService from '../../service/dataService'
+  import pipeService from '../service/pipeService'
   import DetailMap from '../lib/DetailMap'
   export default {
     name: 'mapview',
     data () {
       return {
         title: 'mapview',
-
       }
     },
     mounted(){
@@ -20,6 +20,16 @@
         center: [22.365354, 114.105228],
         bound: null
       });
+      this.map.on('clickOnIcon' , function(stationFeature){
+        console.log('station feature', stationFeature);
+        pipeService.emitStationSelected(stationFeature)
+      });
+
+      pipeService.onStationsReady((stations)=>{
+        this.map.setMarks(stations, function(d){
+          return d.loc;
+        })
+      })
     },
     computed:{
     },

@@ -24,7 +24,7 @@ DetailMap.prototype.init = function(){
   this.satellite = L.tileLayer(mbUrl, {id: 'mapbox.satellite',   attribution: null});
   this.map = L.map(this.$el, {
     center: this.center,
-    zoom: 10,
+    zoom: 11,
     layers: [this.streets, this.cities],
     zoomControl: false,
     maxZoom: 18,
@@ -41,4 +41,55 @@ DetailMap.prototype.init = function(){
   L.control.layers(this.baseLayers).addTo(this.map);
 };
 
+
+DetailMap.prototype.setMarks = function(stations, getLoc){
+  stations.forEach((station, i) =>{
+    station.loc = station.type == 'aqi'? station.loc.reverse(): station.loc;
+  });
+  let iconList = [];
+  for(var i = 0, ilen = stations.length; i < ilen; i++){
+    iconList.push({
+      "type": "Feature",
+      "properties": {
+        'iconType': stations[i].type,
+        'id': stations[i].station_code
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": stations[i].loc
+      },
+    })
+  }
+
+  let pointsLayer = L.geoJSON(iconList, {
+    pointToLayer:  (feature, latlng)=>{
+      let iconType = feature.properties.iconType;
+      let _color = iconType == 'aqi'?'red':'blue';
+      let circleMarker = L.circleMarker(latlng, {
+        radius: 3,
+        fillColor: _color,
+        color: _color,
+        opacity: 0.5,
+        fillOpacity: 1
+      });
+
+      return circleMarker;
+    }
+  });
+  pointsLayer.on('click', (d, i)=>{
+    let stationConfig = {
+      'loc': d.layer.feature.geometry.coordinates,
+      'iconType': d.layer.feature.properties.iconType,
+      'id': d.layer.feature.properties.id
+    };
+    this.clickOnIcon(stationConfig);
+  });
+  pointsLayer.addTo(this.map);
+};
+
+DetailMap.prototype.on = function(event, func){
+  if(event == 'clickOnIcon'){
+    this.clickOnIcon = func;
+  }
+};
 export default DetailMap

@@ -8,26 +8,43 @@
     <div class="main">
       <MapContainer class="mapContainer"></MapContainer>
     </div>
+    <ModalView
+      v-if="showModal"
+      @close="showModal = false"
+      v-bind:selectedStation="selectedStation"
+
+    ></ModalView>
   </div>
 </template>
 
 <script>
 
   import dataService from './service/dataService'
+  import pipeService from './service/pipeService'
   import MapContainer from './components/MapContainer.vue'
+  import ModalView from './components/ModalView.vue'
   export default {
     name: 'app',
     components:{
-      MapContainer
+      MapContainer,
+      ModalView
     },
     data(){
       return {
-
+        showModal: false,
+        selectedStation: null
       }
     },
     mounted(){
-      dataService.getStationsConfig((data)=>{
+      dataService.getStationsConfig((stations)=>{
+        pipeService.emitStationsReady(stations);
+      });
 
+      pipeService.onStationSelected((stationConfig)=>{
+        if(stationConfig.iconType == 'aqi'){
+          this.selectedStation = stationConfig;
+          this.showModal = true;
+        }
       })
     }
   }
@@ -66,13 +83,13 @@
   }
   .main{
     height: calc(100% - 80px);
-
     background-color: antiquewhite;
   }
   .mapContainer{
     height: 100%;
     width: 100%;
   }
+
 
 
 </style>
