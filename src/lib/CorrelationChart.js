@@ -23,13 +23,34 @@ CorrelationChart.prototype.setData = function(dataList){
   this.drawBrushArea();
 };
 
-CorrelationChart.prototype.draw = function(dataList){
+CorrelationChart.prototype.draw = function(dataList, index){
   let _this = this;
+  index = index == undefined ? 0: 1;
   let numberOfContainers = models.length + 2;
   let unitHeight = this.height / numberOfContainers;
   let corrContainerWidth = this.width ;
   let startTime = new Date(dataList[0].time * 1000);
   let endTime = new Date(dataList[dataList.length - 1].time * 1000);
+  let attrs = models.concat(['obs']);
+
+  let maxDiff = d3.max(dataList, (dataObj,i)=>{
+    let arr = [];
+    attrs.forEach((attr)=>{
+      arr.push(dataObj.diff[attr])
+    });
+    return d3.max(arr,value=>{
+      return parseFloat(value);
+    });
+  });
+  let minDiff = d3.min(dataList, (dataObj,i)=>{
+    let arr = [];
+    attrs.forEach((attr)=>{
+      arr.push(dataObj.diff[attr])
+    });
+    return d3.min(arr,value=>{
+      return parseFloat(value);
+    });
+  });
 
   let xCorrScale = d3.scaleTime()
     .range([this.containerMarginLeftAndRight, corrContainerWidth - this.containerMarginLeftAndRight])
@@ -37,9 +58,9 @@ CorrelationChart.prototype.draw = function(dataList){
 
   let yCorrScale = d3.scaleLinear()
     .range([unitHeight - this.containerMarginTopAndBottom, this.containerMarginTopAndBottom])
-    .domain([-1, 1]);
+    .domain([minDiff, maxDiff]);
 
-  let attrs = models.concat(['obs']);
+
   let maxValue = d3.max(dataList, (dataObj,i)=>{
     return d3.max(dataObj.data, (d,i)=>{
       let arr = [];
@@ -49,7 +70,6 @@ CorrelationChart.prototype.draw = function(dataList){
       return d3.max(arr,value=>{
         return parseFloat(value);
       });
-
     })
   });
   let minValue = d3.min(dataList, (dataObj,i)=>{
@@ -115,10 +135,13 @@ CorrelationChart.prototype.draw = function(dataList){
 
   corrContainers.each(function(model, i){
     let corrContainer = d3.select(this);
+    corrContainer.append('text').text(model)
+      .attr('x', _this.containerMarginLeftAndRight + 5)
+      .attr('y', _this.containerMarginTopAndBottom + 20)
     let xAxis = d3.axisBottom(xCorrScale);
     let yAxis = d3.axisLeft(yCorrScale);
     corrContainer.append('g').attr('class', 'x-axis')
-      .attr('transform', 'translate(0, ' + (unitHeight ) / 2  + ')')
+      .attr('transform', 'translate(0, ' + (yCorrScale(0))  + ')')
       .call(xAxis);
     corrContainer.append('g').attr('class', 'y-axis')
       .attr('transform', 'translate(' + (_this.containerMarginLeftAndRight) + ',0)')
@@ -132,7 +155,7 @@ CorrelationChart.prototype.draw = function(dataList){
       })
       .attr('width', _w)
       .attr('y', (d)=>{
-        let value = d.corr[model][0];
+        let value = d.diff[model][0];
         if(value < 0){
           return yCorrScale(0);
         }else{
@@ -140,7 +163,7 @@ CorrelationChart.prototype.draw = function(dataList){
         }
       })
       .attr('height', (d)=>{
-        let value = d.corr[model][0];
+        let value = d.diff[model][0];
         let h = Math.abs(yCorrScale(0) - yCorrScale(value));
         return h;
       })
@@ -187,7 +210,7 @@ CorrelationChart.prototype.drawBrushArea = function(){
       });
     })
   });
-  console.log('max', minValue, maxValue);
+
   let yValueScale = d3.scaleLinear()
     .range([unitHeight - this.containerMarginTopAndBottom, this.containerMarginTopAndBottom])
     .domain([minValue, maxValue]);
