@@ -5,15 +5,16 @@
         <span>PRAISE-HK</span>
       </div>
     </div>
-    <div class="main">
-      <MapContainer class="mapContainer"></MapContainer>
-    </div>
+
     <ModalView
       v-if="showModal"
       @close="showModal = false"
       v-bind:selectedStation="selectedStation"
-
     ></ModalView>
+
+    <div class="main">
+      <MapContainer class="mapContainer"></MapContainer>
+    </div>
   </div>
 </template>
 
@@ -23,16 +24,25 @@
   import pipeService from './service/pipeService'
   import MapContainer from './components/MapContainer.vue'
   import ModalView from './components/ModalView.vue'
+
   export default {
     name: 'app',
     components:{
       MapContainer,
-      ModalView
+      ModalView,
+
     },
     data(){
       return {
         showModal: false,
-        selectedStation: null
+        selectedStation: null,
+        dialog: false,
+        test: true
+      }
+    },
+    watch:{
+      dialog(newdata){
+        console.log('new', newdata)
       }
     },
     mounted(){
@@ -88,6 +98,7 @@
   .mapContainer{
     height: 100%;
     width: 100%;
+    z-index: 0;
   }
 
 
