@@ -8,9 +8,9 @@ import VueResource from 'vue-resource'
 
 Vue.use(VueResource);
 const $http = Vue.http;
-const dataServerUrl = "http://127.0.0.1:6000";
+const dataServerUrl = "http://127.0.0.1:9000";
+// const dataServerUrl = "/praise-hk"
 // const dataServerUrl = "";
-
 function getStationsConfig (callback) {
   const url = `${dataServerUrl}/stationConfig`
   $http.get(url).then(response => {
