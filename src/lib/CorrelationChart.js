@@ -172,6 +172,7 @@ CorrelationChart.prototype.draw = function(dataList, index){
   });
 };
 
+
 CorrelationChart.prototype.drawBrushArea = function(){
   let _this = this;
   let numberOfContainers = models.length + 2;
